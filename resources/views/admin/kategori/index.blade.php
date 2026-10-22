@@ -1,0 +1,67 @@
+@extends('layouts.app')
+
+@section('title', 'Kelola Kategori - Panel Admin')
+@section('header-title', 'Manajemen Kategori Alat')
+
+@section('content')
+
+<div class="card">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
+        <h3 class="card-title mb-2 mb-md-0">Daftar Kategori Alat</h3>
+
+        <div class="d-flex flex-wrap align-items-center">
+            <form action="{{ route('admin.kategori.index') }}" method="GET" class="form-inline mr-2 mb-2 mb-md-0">
+                <input type="text" name="search" value="{{ request('search') }}" class="form-control form-control-sm mr-1" placeholder="Cari nama kategori...">
+                <button type="submit" class="btn btn-sm btn-secondary mr-1"><i class="fas fa-search"></i></button>
+                @if(request('search'))
+                    <a href="{{ route('admin.kategori.index') }}" class="btn btn-sm btn-outline-secondary" title="Reset"><i class="fas fa-times"></i></a>
+                @endif
+            </form>
+            <a href="{{ route('admin.kategori.create') }}" class="btn btn-sm btn-primary mb-2 mb-md-0">
+                <i class="fas fa-plus"></i> Tambah Kategori
+            </a>
+        </div>
+    </div>
+
+    <div class="card-body table-responsive p-0">
+        <table class="table table-hover text-nowrap mb-0">
+            <thead>
+                <tr>
+                    <th style="width:60px">No</th>
+                    <th>Nama Kategori</th>
+                    <th style="width:180px">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($kategoris as $index => $kategori)
+                    <tr>
+                        <td>{{ $kategoris->firstItem() + $index }}</td>
+                        <td>{{ $kategori->nama_kategori }}</td>
+                        <td>
+                            <a href="{{ route('admin.kategori.edit', $kategori->id) }}" class="btn btn-xs btn-warning">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <form action="{{ route('admin.kategori.destroy', $kategori->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus kategori ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-xs btn-danger">
+                                    <i class="fas fa-trash"></i> Hapus
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="3" class="text-center py-3">Belum ada data kategori.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card-footer">
+        {{ $kategoris->links() }}
+    </div>
+</div>
+
+@endsection

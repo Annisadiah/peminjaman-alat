@@ -1,0 +1,72 @@
+services:
+
+  # === Laravel App (PHP-FPM) ===
+  alat_app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: alat_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    networks:
+      - alat_network
+    depends_on:
+      - alat_db
+
+  # === Nginx (web server) ===
+  alat_nginx:
+    image: nginx:stable-alpine
+    container_name: alat_nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - alat_network
+    depends_on:
+      - alat_app
+
+  # === MySQL ===
+  alat_db:
+    image: mysql:8.0
+    container_name: alat_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: peminjaman_alat
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: laravel
+    ports:
+      - "3306:3306"
+    volumes:
+      - alat_db_data:/var/lib/mysql
+    networks:
+      - alat_network
+
+  # === phpMyAdmin (opsional, buat lihat data lewat browser) ===
+  alat_phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: alat_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: alat_db
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - "8081:80"
+    networks:
+      - alat_network
+    depends_on:
+      - alat_db
+
+networks:
+  alat_network:
+    driver: bridge
+
+volumes:
+  alat_db_data:
+    driver: local
